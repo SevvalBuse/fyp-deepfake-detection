@@ -210,3 +210,7 @@ __marimo__/
 
 data/
 venv/
+
+
+
+src/shape_predictor_68_face_landmarks.dat
