@@ -41,9 +41,10 @@ This file is included to support the transparency of the preliminary experiment 
 in the initial report. It represents an exploratory result and will be regenerated
 programmatically for larger-scale experiments in future project stages.
 
+## 
+
 
 `src/check_rois.py`: A diagnostic tool used to visualize facial landmark alignment. It ensures that the Regions of Interest (ROIs), forehead and cheeks, are correctly placed for accurate rPPG signal extraction across different head poses and skin tones.
 
 ## Status
 In progress – Final Year Project (BSc Computer Science)
-
