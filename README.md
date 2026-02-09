@@ -1,11 +1,17 @@
 # FYP – Deepfake Video Detection via Physiological Signals
 
-This Final Year Project focuses on detecting deepfake videos by analysing
-physiological signals, specifically eye-blink dynamics and remote
-photoplethysmography (rPPG).
+This Final Year Project (BSc Computer Science) investigates deepfake video
+detection through the analysis of physiological signals, with a particular
+focus on algorithmic fairness and cross-dataset generalisation.
 
-The project aims to improve robustness, interpretability, and cross-dataset
-generalisation compared to traditional artifact-based deepfake detectors.
+Unlike traditional artifact-based detectors, this project leverages
+biological cues, eye-blink dynamics and remote photoplethysmography (rPPG),
+to improve robustness against unseen manipulations and real-world bias.
+
+A key objective of this work is to evaluate whether physiological-based
+deepfake detection systems behave consistently across diverse skin tone
+groups, using the Individual Typology Angle (ITA) scale as a fairness-aware
+audit mechanism.
 
 ## Setup & Requirements
 
@@ -33,18 +39,63 @@ Note: This file is ~100MB and is intentionally not added to Git. You must downlo
 
 ## Preliminary Results Data
 
-The file `blink_comparison_results.csv` contains Eye Aspect Ratio (EAR) values extracted
-from one real (585.mp4) and one deepfake (585_599.mp4) video from the FaceForensics++
-dataset.
-
-This file is included to support the transparency of the preliminary experiment shown
-in the initial report. It represents an exploratory result and will be regenerated
-programmatically for larger-scale experiments in future project stages.
-
-## 
+Preliminary eye-blink and rPPG analyses were conducted on a limited subset of
+videos to validate the signal extraction pipeline. The resulting plots and
+qualitative analyses are presented in the project report but are not publicly
+released due to dataset licensing constraints.
 
 
-`src/check_rois.py`: A diagnostic tool used to visualize facial landmark alignment. It ensures that the Regions of Interest (ROIs), forehead and cheeks, are correctly placed for accurate rPPG signal extraction across different head poses and skin tones.
+## Data & Methodology
+
+### Datasets
+- Training Dataset: 
+  Celeb-DF v2 — used for large-scale learning of physiological signal patterns.
+
+- Independent Audit Dataset:
+  A curated subset of 66 videos from FaceForensics++ (FF++), manually balanced
+  across *light*, *medium*, and *dark* skin tone groups to enable controlled
+  bias analysis.
+
+### Signal Extraction
+- rPPG:
+  Extracted using both **CHROM** and **POS** algorithms, followed by signal
+  cleaning and frequency filtering.
+
+- Eye-Blink Dynamics:  
+  Eye Aspect Ratio (EAR) computed using Dlib’s 68-point facial landmark model.
+
+Algorithm selection was informed through comparative visual analysis of signal
+quality across different skin tone groups.
+
+
+
+## Scripts Overview
+
+  - `src/physio_extractor.py`  
+  Core signal extraction engine performing face tracking, ROI extraction,
+  and raw physiological signal collection.
+
+- `src/signal_analyser.py`  
+  Computes signal quality and forensic metrics such as SNR and BPM to assess
+  rPPG reliability.
+
+- `src/bias_auditor.py`  
+  Evaluation module designed to analyse model performance across skin tone
+  groups using the independent audit dataset.
+
+- `src/check_rois.py`  
+  Diagnostic utility for visually verifying facial landmark alignment and ROI
+  placement (forehead and cheeks) across different head poses and skin tones.
+
+- `src/dual_algo_processor.py`  
+  Implements signal processing pipelines including Butterworth filtering and
+  normalisation for CHROM and POS outputs.
+
+- `src/generate_report_plots.py`  
+  Generates comparative visualisations of rPPG signals extracted using CHROM
+  and POS algorithms. These plots were used to inform algorithm selection
+  across different skin tone groups.
+
 
 ## Status
 In progress – Final Year Project (BSc Computer Science)
