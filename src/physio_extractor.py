@@ -6,15 +6,15 @@ import os
 from tqdm import tqdm
 
 # --- CONFIG ---
-AUDIT_CSV = "dataset_bias_audit.csv"  # must contain columns: video_id, is_deepfake (0/1)
+AUDIT_CSV = "data/output/dataset_bias_audit.csv"  # must contain columns: video_id, is_deepfake (0/1)
 SHAPE_PREDICTOR = "src/shape_predictor_68_face_landmarks.dat"
-OUTPUT_DIR = "data/signals/raw"
+OUTPUT_DIR = "data/signals/audit_ff/raw"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(SHAPE_PREDICTOR)
 
-META_OUT = "raw_metadata.csv"
+META_OUT = "data/output/raw_metadata.csv"
 
 
 def calculate_ita(l_val, b_val):
@@ -101,9 +101,9 @@ def run_extraction():
         filename = v_id.split("/")[-1]
 
         if label == 0:
-            v_path = os.path.join("data/original_sequences/youtube/c23/videos", filename)
+            v_path = os.path.join("data/audit_set/original_sequences/youtube/c23/videos", filename)
         else:
-            v_path = os.path.join("data/manipulated_sequences/Deepfakes/c23/videos", filename)
+            v_path = os.path.join("data/audit_set/manipulated_sequences/Deepfakes/c23/videos", filename)
 
         if not os.path.exists(v_path):
             continue

@@ -5,11 +5,11 @@ import random
 
 # U
 DATASET_PATHS = [
-    "data/original_sequences/youtube/c23/videos",
-    "data/manipulated_sequences/Deepfakes/c23/videos"
+    "data/audit_set/original_sequences/youtube/c23/videos",
+    "data/audit_set/manipulated_sequences/Deepfakes/c23/videos"
 ]
 
-LOG_FILE = "dataset_bias_audit.csv"
+LOG_FILE = "data/output/dataset_bias_audit.csv"
 
 GENDER_OPTIONS = {"m", "f", "other", "unclear"}
 TONE_OPTIONS = {"light", "medium", "dark", "unclear"}

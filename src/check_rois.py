@@ -14,7 +14,7 @@ def draw_roi(frame, points, color=(0, 255, 0)):
                   (max(x_coords), max(y_coords)), color, 2)
 
 # TEST ON ONE OF VIDEOS (e.g., ID 031 or 111)
-video_path = "data/original_sequences/youtube/c23/videos/241.mp4" 
+video_path = "data/audit_set/original_sequences/youtube/c23/videos/241.mp4" 
 cap = cv2.VideoCapture(video_path)
 
 while cap.isOpened():

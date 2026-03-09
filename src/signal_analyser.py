@@ -47,7 +47,7 @@ def analyze_benchmarks():
     results = []
 
     # Load metadata for specific video FPS
-    meta_path = "raw_metadata.csv"
+    meta_path = "data/output/raw_metadata.csv"
     meta_df = pd.read_csv(meta_path) if os.path.exists(meta_path) else None
 
     print(f"Benchmarking {len(files)} signals...")
@@ -74,13 +74,13 @@ def analyze_benchmarks():
         })
 
     df_analysis = pd.DataFrame(results)
-    df_analysis.to_csv("rppg_method_comparison.csv", index=False)
-    
+    df_analysis.to_csv("data/output/rppg_method_comparison.csv", index=False)
+
     # Summary Statistics
     summary = df_analysis.groupby("method")[["measured_snr"]].mean()
     print("\n--- Benchmark Summary ---")
     print(summary)
-    print("\nResults saved to rppg_method_comparison.csv")
+    print("\nResults saved to data/output/rppg_method_comparison.csv")
 
 if __name__ == "__main__":
     analyze_benchmarks()

@@ -7,7 +7,7 @@ from tqdm import tqdm
 # --- CONFIGURATION ---
 RAW_DIR = "data/signals/audit_ff/raw"
 CLEAN_DIR = "data/signals/audit_ff/clean"
-META_PATH = "raw_metadata.csv"  # Per-video FPS information
+META_PATH = "data/output/raw_metadata.csv"  # Per-video FPS information
 os.makedirs(CLEAN_DIR, exist_ok=True)
 
 # 1. Filtering: Butterworth Bandpass Filter
