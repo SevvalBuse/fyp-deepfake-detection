@@ -108,6 +108,10 @@ def run_extraction():
         if not os.path.exists(v_path):
             continue
 
+        out_name = f"{filename.replace('.mp4', '')}_raw.npy"
+        if os.path.exists(os.path.join(OUTPUT_DIR, out_name)):
+            continue  # already processed, skip
+
         cap = cv2.VideoCapture(v_path)
         if not cap.isOpened():  # guard failed open
             continue
@@ -177,7 +181,11 @@ def run_extraction():
         })
 
     if meta_rows:
-        pd.DataFrame(meta_rows).to_csv(META_OUT, index=False)
+        new_meta = pd.DataFrame(meta_rows)
+        if os.path.exists(META_OUT):
+            existing_meta = pd.read_csv(META_OUT)
+            new_meta = pd.concat([existing_meta, new_meta], ignore_index=True)
+        new_meta.to_csv(META_OUT, index=False)
 
     print("\nExtraction complete. Raw signals saved in:", OUTPUT_DIR)
     print("Metadata saved in:", META_OUT)
