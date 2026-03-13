@@ -28,10 +28,7 @@ pip install -r requirements.txt
 
 This project requires the Dlib 68-point Face Landmark Predictor.
 
-Download `shape_predictor_68_face_landmarks.dat` from:
-https://github.com/ageitgey/face_recognition_models
-
-Place it inside the `src/` folder.
+Download `shape_predictor_68_face_landmarks.dat` and place it inside the `src/` folder.
 
 > Note: This file is ~100MB and is not tracked by Git. You must download it manually to run any landmark-dependent module.
 
@@ -39,45 +36,51 @@ Place it inside the `src/` folder.
 
 ## Dataset
 
-- **Source:** FaceForensics++ (FF++), c23 compression
-- **Size:** 260 videos (130 real, 130 fake)
+- **Source:** FaceForensics++ (FF++), c23 compression, Deepfakes method
+- **Size:** 1,026 videos (513 real, 513 fake)
 - **Construction:**
-  - Initial 66 videos manually curated and labelled using `bias_auditor.py`
-  - Expanded to 260 using automated ITA-based skin tone selection (`expand_audit_set.py`)
+  - Initial 66 videos manually curated and labelled using `src/utils/manual_annotator.py`
+  - Expanded to 1,026 using automated ITA-based skin tone selection (`src/preprocessing/expand_audit_set.py`)
   - Selection balanced across light (ITA > 41), medium (10 < ITA ≤ 41), and dark (ITA ≤ 10) groups
   - Skin tone measured objectively from forehead region using the ITA formula — no manual labelling for expanded set
-- **Labels:** `dataset_bias_audit.csv` — `video_id`, `is_deepfake`, `gender_presentation`, `skin_tone_group`
+- **Labels:** `data/output/dataset_bias_audit.csv` — `video_id`, `is_deepfake`, `gender_presentation`, `skin_tone_group`
+- **Bias audit subset:** `data/output/bias_audit_ids.csv` — 300 videos with balanced ITA groups (100 per group) used for fairness evaluation
 
 ---
 
 ## Pipeline
 
-Run scripts in the following order:
+All scripts are run from the **project root**. Run in the following order:
 
-### 1. `src/physio_extractor.py`
-Detects faces, extracts forehead and cheek ROIs per frame, records BGR colour signals and ITA.
+### 1. `src/preprocessing/physio_extractor.py`
+Detects faces, extracts forehead and cheek ROIs per frame, records BGR colour signals.
 - **Input:** `data/audit_set/` videos, `data/output/dataset_bias_audit.csv`
 - **Output:** `data/signals/audit_ff/raw/*.npy`, `data/output/raw_metadata.csv`
 
-### 2. `src/dual_algo_processor.py`
+### 2. `src/preprocessing/dual_algo_processor.py`
 Applies CHROM and POS rPPG algorithms + Butterworth bandpass filter (0.7–3.0 Hz).
 - **Input:** `data/signals/audit_ff/raw/*.npy`, `data/output/raw_metadata.csv`
 - **Output:** `data/signals/audit_ff/clean/*_chrom.npy`, `*_pos.npy`
 
-### 3. `src/signal_analyser.py`
+### 3. `src/analysis/signal_analyser.py`
 Computes SNR and estimated BPM for each clean signal via FFT.
 - **Input:** `data/signals/audit_ff/clean/*.npy`, `data/output/raw_metadata.csv`
 - **Output:** `data/output/rppg_method_comparison.csv`
 
-### 4. `src/ear_extractor.py`
+### 4. `src/preprocessing/ear_extractor.py`
 Extracts 7 eye-blink features per video using dlib 68-point landmarks and Eye Aspect Ratio (EAR).
 - **Input:** `data/audit_set/` videos, `data/output/dataset_bias_audit.csv`
 - **Output:** `data/output/ear_features.csv`
 
-### 5. `src/compute_audit_ita.py`
-Recomputes ITA values for all 260 videos using the correct OpenCV LAB normalisation.
+### 5. `src/preprocessing/compute_audit_ita.py`
+Recomputes ITA values for all videos using the correct OpenCV LAB normalisation.
 - **Input:** `data/audit_set/` videos, `data/output/dataset_bias_audit.csv`
 - **Output:** `data/output/ita_objective_audit.csv`
+
+### 6. `src/analysis/feature_merger.py`
+Merges rPPG features, EAR features, and ITA values into a single feature matrix.
+- **Input:** `data/output/rppg_method_comparison.csv`, `data/output/ear_features.csv`, `data/output/ita_objective_audit.csv`
+- **Output:** `data/output/unified_features.csv`
 
 ---
 
@@ -85,30 +88,29 @@ Recomputes ITA values for all 260 videos using the correct OpenCV LAB normalisat
 
 | File | Description |
 |---|---|
-| `data/output/dataset_bias_audit.csv` | Master list of 260 videos with labels and demographic metadata |
+| `data/output/dataset_bias_audit.csv` | Master list of 1,026 videos with labels and demographic metadata |
 | `data/output/raw_metadata.csv` | FPS and frame count per video |
-| `data/output/rppg_method_comparison.csv` | SNR and BPM per video per rPPG method (520 rows) |
+| `data/output/rppg_method_comparison.csv` | SNR and BPM per video per rPPG method |
 | `data/output/ear_features.csv` | 7 blink features per video |
-| `data/output/ita_objective_audit.csv` | Objective ITA skin tone values for all 260 videos |
-| `data/output/unified_features.csv` | *(to be generated)* Merged feature matrix for classifier training |
+| `data/output/ita_objective_audit.csv` | Objective ITA skin tone values for all videos |
+| `data/output/unified_features.csv` | Merged feature matrix for classifier training (1,026 rows, 12 features) |
+| `data/output/bias_audit_ids.csv` | 300-video ITA-balanced subset for fairness evaluation |
 
 ---
 
-## Scripts Overview
+## Report Visuals
 
-| Script | Purpose |
+All charts are saved to `data/report_visuals/`:
+
+| File | Description |
 |---|---|
-| `src/bias_auditor.py` | Manual annotation UI — used to label the initial 66 videos |
-| `src/expand_audit_set.py` | Automated ITA-based dataset expansion from temp_scan to audit_set |
-| `src/physio_extractor.py` | Raw rPPG signal extraction (forehead + cheeks, BGR per frame) |
-| `src/dual_algo_processor.py` | CHROM and POS rPPG algorithms + Butterworth filtering |
-| `src/signal_analyser.py` | FFT-based SNR and BPM computation |
-| `src/ear_extractor.py` | Batch eye-blink (EAR) feature extraction |
-| `src/compute_audit_ita.py` | Correct ITA computation for all audit set videos |
-| `src/ita_scanner.py` | ITA scanning utility for large video collections |
-| `src/generate_report_plots.py` | Comparative rPPG signal visualisations (Raw vs CHROM vs POS) |
-| `src/generate_correlation.py` | Correlation matrix heatmap across features and demographics |
-| `src/check_rois.py` | Diagnostic tool for verifying facial ROI placement |
+| `model_comparison.png` | All models — accuracy, precision, recall, F1 |
+| `model_accuracy_only.png` | Accuracy-only bar chart |
+| `correlation_matrix_final.png` | 13×13 feature correlation heatmap |
+| `feature_target_correlation.png` | Per-feature correlation with deepfake label |
+| `bias_audit_model_comparison.png` | XGBoost vs RF by ITA skin tone group |
+| `bias_audit_xgb_mitigation.png` | XGBoost baseline vs class weights vs ThresholdOpt |
+| `individual_models/*.png` | Per-model heatmaps with ITA group breakdown |
 
 ---
 
@@ -122,7 +124,7 @@ Skin tone groups are derived from the ITA (Individual Typology Angle) scale:
 | Medium | 10 < ITA ≤ 41 |
 | Light | ITA > 41 |
 
-ITA is measured directly from each video's forehead region. For fake videos, ITA reflects the face shown in the video (the source identity), not the target.
+ITA is measured directly from each video's forehead region using the LAB colour space. For fake videos, ITA reflects the face shown in the video (the source identity), not the target.
 
 ---
 

@@ -3,58 +3,77 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
-# --- CONFIG ---
-REPORT_DIR = "data/report_visuals"
-os.makedirs(REPORT_DIR, exist_ok=True)
+os.makedirs("data/report_visuals", exist_ok=True)
 
-def generate_bias_correlation():
-    print("Generating Forensic Correlation Matrix...")
+FEATURES_CSV = "data/output/unified_features.csv"
 
-    # 1. Load your results
-    try:
-        manual_df = pd.read_csv("data/output/dataset_bias_audit.csv")
-        ita_df = pd.read_csv("data/output/ita_objective_audit.csv")
-        snr_df = pd.read_csv("data/output/rppg_method_comparison.csv")
-    except FileNotFoundError as e:
-        print(f"Error: Missing files. {e}")
-        return
+FEATURE_LABELS = {
+    "chrom_snr":           "CHROM SNR",
+    "pos_snr":             "POS SNR",
+    "chrom_bpm":           "CHROM BPM",
+    "pos_bpm":             "POS BPM",
+    "mean_ear":            "Mean EAR",
+    "std_ear":             "Std EAR",
+    "min_ear":             "Min EAR",
+    "blink_count":         "Blink Count",
+    "blink_rate_per_min":  "Blink Rate/min",
+    "mean_blink_duration": "Mean Blink Dur.",
+    "std_blink_duration":  "Std Blink Dur.",
+    "measured_ita":        "ITA (Skin Tone)",
+    "is_deepfake":         "Is Deepfake",
+}
 
-    # Use CHROM SNR only (one row per video)
-    snr_df = snr_df[snr_df['method'] == 'CHROM'].copy()
+COLS = list(FEATURE_LABELS.keys())
 
-    # 2. Harmonize IDs
-    for df in [manual_df, ita_df, snr_df]:
-        df['join_id'] = df['video_id'].apply(lambda x: str(x).split('/')[-1].replace('.mp4', ''))
 
-    # 3. Merge
-    master_df = pd.merge(manual_df, ita_df[['join_id', 'measured_ita']], on="join_id")
-    master_df = pd.merge(master_df, snr_df[['join_id', 'measured_snr', 'measured_bpm']], on="join_id")
+def run():
+    df = pd.read_csv(FEATURES_CSV)
+    df = df[COLS].dropna()
 
-    # 4. Convert Skin Tone to Numeric
-    skin_mapping = {'dark': 0, 'medium': 1, 'light': 2}
-    master_df['skin_numeric'] = master_df['skin_tone_group'].map(skin_mapping)
+    print(f"Computing correlation matrix on {len(df)} videos...")
 
-    # 5. NEW LOGIC: Underscore (_) means Manipulated/Fake
-    # Example: '111' is Real (0), '111_094' is Fake (1)
-    master_df['is_deepfake'] = master_df['join_id'].apply(
-        lambda x: 1 if "_" in str(x) else 0
+    corr = df.rename(columns=FEATURE_LABELS).corr()
+
+    # --- Full heatmap ---
+    plt.figure(figsize=(13, 10))
+    sns.heatmap(
+        corr,
+        annot=True,
+        fmt=".2f",
+        cmap="coolwarm",
+        center=0,
+        linewidths=0.5,
+        annot_kws={"size": 8},
     )
-
-    # 6. Correlation Math
-    corr_cols = ['skin_numeric', 'measured_ita', 'measured_snr', 'measured_bpm', 'is_deepfake']
-    correlation_matrix = master_df[corr_cols].corr()
-
-    # 7. Heatmap Generation
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
-    plt.title("Forensic Feature Correlation Matrix\n(Real vs. Deepfake Signal Analysis)", fontsize=14, fontweight='bold')
-    
-    save_path = os.path.join(REPORT_DIR, "correlation_matrix_final.png")
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.title("Feature Correlation Matrix — Deepfake Detection (n=1025)",
+              fontsize=13, fontweight="bold", pad=15)
+    plt.xticks(rotation=45, ha="right", fontsize=9)
+    plt.yticks(rotation=0, fontsize=9)
+    plt.tight_layout()
+    path1 = "data/report_visuals/correlation_matrix_final.png"
+    plt.savefig(path1, dpi=300, bbox_inches="tight")
     plt.show()
-    
-    print(f"SUCCESS: Analysis complete. Plot saved to {save_path}")
-    print(correlation_matrix[['is_deepfake']])
+    print(f"Saved to {path1}")
+
+    # --- Correlation with is_deepfake only (bar chart) ---
+    target_corr = corr["Is Deepfake"].drop("Is Deepfake").sort_values()
+
+    colors = ["#C44E52" if v < 0 else "#4C72B0" for v in target_corr]
+
+    plt.figure(figsize=(9, 5))
+    plt.barh(target_corr.index, target_corr.values, color=colors, edgecolor="white")
+    plt.axvline(0, color="black", linewidth=0.8)
+    plt.xlabel("Pearson Correlation with Is Deepfake", fontsize=11)
+    plt.title("Feature Correlation with Deepfake Label", fontsize=13, fontweight="bold")
+    plt.tight_layout()
+    path2 = "data/report_visuals/feature_target_correlation.png"
+    plt.savefig(path2, dpi=300, bbox_inches="tight")
+    plt.show()
+    print(f"Saved to {path2}")
+
+    print("\nCorrelations with is_deepfake:")
+    print(target_corr.sort_values(key=abs, ascending=False).to_string())
+
 
 if __name__ == "__main__":
-    generate_bias_correlation()
+    run()
