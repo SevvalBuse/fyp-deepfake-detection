@@ -32,28 +32,28 @@ def save_heatmap(title, df, filename, vmin=0.35, vmax=0.85):
 # ── XGBoost ───────────────────────────────────────────────────────────────────
 # Rows = metrics, Columns = Overall + ITA groups
 xgb_df = pd.DataFrame({
-    "Overall": [0.770, 0.774, 0.764, 0.767],
-    "Light":   [0.802, 0.861, 0.774, 0.810],
-    "Medium":  [0.651, 0.684, 0.674, 0.672],
-    "Dark":    [0.790, 0.772, 0.785, 0.773],
+    "Overall": [0.797, 0.818, 0.780, 0.798],
+    "Light":   [0.780, 0.788, 0.788, 0.788],
+    "Medium":  [0.740, 0.780, 0.722, 0.750],
+    "Dark":    [0.870, 0.886, 0.830, 0.857],
 }, index=["Accuracy", "Precision", "Recall", "F1 Score"])
 
 save_heatmap(
-    title    = "XGBoost (tuned) — Performance Heatmap",
+    title    = "XGBoost — Held-Out Bias Audit (n=300)",
     df       = xgb_df,
     filename = "xgboost.png",
 )
 
 # ── Random Forest ─────────────────────────────────────────────────────────────
 rf_df = pd.DataFrame({
-    "Overall": [0.767, 0.773, 0.760, 0.765],
-    "Light":   [0.802, 0.865, 0.774, 0.811],
-    "Medium":  [0.690, 0.712, 0.712, 0.709],
-    "Dark":    [0.782, 0.761, 0.785, 0.766],
+    "Overall": [0.770, 0.780, 0.728, 0.749],
+    "Light":   [0.760, 0.780, 0.750, 0.765],
+    "Medium":  [0.740, 0.780, 0.722, 0.750],
+    "Dark":    [0.810, 0.833, 0.745, 0.787],
 }, index=["Accuracy", "Precision", "Recall", "F1 Score"])
 
 save_heatmap(
-    title    = "Random Forest (tuned) — Performance Heatmap",
+    title    = "Random Forest — Held-Out Bias Audit (n=300)",
     df       = rf_df,
     filename = "random_forest.png",
 )

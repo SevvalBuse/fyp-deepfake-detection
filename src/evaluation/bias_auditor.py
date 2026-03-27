@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.model_selection import StratifiedKFold
 import matplotlib.pyplot as plt
+import joblib
 import os
 import warnings
 warnings.filterwarnings("ignore")
@@ -304,8 +305,47 @@ def fairness_gap(summary, label):
     return gap
 
 
+def run_held_out(df, model_path, label):
+    """Test a saved model (trained on 1,699) directly on the 300 held-out videos."""
+    if not os.path.exists(model_path):
+        print(f"{model_path} not found — run classifier.py first.")
+        return
+
+    model  = joblib.load(model_path)
+    X      = df[FEATURES].values
+    y      = df[LABEL].values
+    groups = df["ita_group"].values
+    preds  = model.predict(X)
+
+    print(f"\n========== HELD-OUT BIAS AUDIT — {label.upper()} (trained on 1,699) ==========")
+    print(f"Overall accuracy: {accuracy_score(y, preds):.3f}")
+
+    summary = {}
+    for group in ITA_GROUPS:
+        mask = groups == group
+        if mask.sum() == 0:
+            continue
+        g_true = y[mask]
+        g_pred = preds[mask]
+        acc  = accuracy_score(g_true, g_pred)
+        prec = precision_score(g_true, g_pred, zero_division=0)
+        rec  = recall_score(g_true, g_pred, zero_division=0)
+        f1   = f1_score(g_true, g_pred, zero_division=0)
+        print(f"  {group.capitalize():8s} (n={mask.sum():3d}): "
+              f"Acc={acc:.3f} | Prec={prec:.3f} | Rec={rec:.3f} | F1={f1:.3f}")
+        summary[group] = {"accuracy": acc, "precision": prec, "recall": rec, "f1": f1}
+
+    accs = [summary[g]["accuracy"] for g in ITA_GROUPS if g in summary]
+    print(f"  Fairness gap (max - min accuracy): {max(accs) - min(accs):.3f}")
+    return summary
+
+
 def run():
     df = load_data()
+
+    print("\n--- Proper held-out evaluation")
+    run_held_out(df, "data/output/rf_model.pkl",  "Random Forest")
+    run_held_out(df, "data/output/xgb_model.pkl", "XGBoost")
 
     xgb_base = run_bias_audit(df, "XGBoost baseline",       xgb_baseline)
     xgb_cw   = run_bias_audit(df, "XGBoost + class weights", xgb_class_weights)

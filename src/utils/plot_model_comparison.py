@@ -4,19 +4,19 @@ import os
 
 os.makedirs("data/report_visuals", exist_ok=True)
 
-# --- Results from 5-fold CV on 1025-video dataset ---
+# --- Results from 5-fold CV on 1699-video training set (300 held out for bias audit) ---
 models = [
     "Logistic\nRegression",
-    "Random\nForest\n(tuned)",
-    "XGBoost\n(tuned)",
+    "Random\nForest",
+    "XGBoost",
     "1D CNN\n(raw signals)",
     "CNN-LSTM\n(raw signals)",
 ]
 
-accuracy  = [0.746, 0.767, 0.770, 0.555, 0.514]
-precision = [0.748, 0.773, 0.774, 0.598, 0.524]
-recall    = [0.744, 0.760, 0.764, 0.415, 0.399]
-f1        = [0.745, 0.765, 0.767, 0.467, 0.445]
+accuracy  = [0.744, 0.756, 0.739, 0.555, 0.514]
+precision = [0.750, 0.770, 0.747, 0.598, 0.524]
+recall    = [0.729, 0.728, 0.719, 0.415, 0.399]
+f1        = [0.739, 0.749, 0.732, 0.467, 0.445]
 
 x = np.arange(len(models))
 width = 0.2
@@ -40,7 +40,7 @@ for bars in [bars1, bars2, bars3, bars4]:
 
 ax.set_ylim(0, 1.0)
 ax.set_ylabel("Score", fontsize=12)
-ax.set_title("Model Comparison — Deepfake Detection (5-Fold CV, n=1026)", fontsize=13, fontweight="bold")
+ax.set_title("Model Comparison — Deepfake Detection (5-Fold CV, n=1699)", fontsize=13, fontweight="bold")
 ax.set_xticks(x)
 ax.set_xticklabels(models, fontsize=10)
 ax.legend(fontsize=10)
@@ -68,7 +68,7 @@ for bar in bars:
 
 ax2.set_ylim(0, 1.0)
 ax2.set_ylabel("Accuracy", fontsize=12)
-ax2.set_title("Classification Accuracy by Model (5-Fold CV, n=1026)", fontsize=13, fontweight="bold")
+ax2.set_title("Classification Accuracy by Model (5-Fold CV, n=1699)", fontsize=13, fontweight="bold")
 ax2.axhline(0.5, color="gray", linestyle="--", linewidth=1.0, alpha=0.7)
 ax2.text(4.5, 0.515, "Random baseline (0.5)", ha="right", fontsize=9, color="gray")
 ax2.yaxis.grid(True, linestyle="--", alpha=0.4)

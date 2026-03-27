@@ -9,8 +9,9 @@ from tqdm import tqdm
 # Update these paths to match your local Celeb-DF v2 directory structure
 DATA_ROOT = "data/celeb_df_v2"
 PATHS = {
-    "celeb_real": os.path.join(DATA_ROOT, "Celeb-real"),
-    "youtube_real": os.path.join(DATA_ROOT, "YouTube-real"),
+    "celeb_real":      (os.path.join(DATA_ROOT, "Celeb-real"),      0),
+    "youtube_real":    (os.path.join(DATA_ROOT, "YouTube-real"),     0),
+    "celeb_synthesis": (os.path.join(DATA_ROOT, "Celeb-synthesis"),  1),
 }
 
 SHAPE_PREDICTOR = "src/shape_predictor_68_face_landmarks.dat"
@@ -76,19 +77,18 @@ def scan_ita_fast(v_path):
 def run_inventory_scan():
     all_results = []
     
-    for label_type, folder_path in PATHS.items():
+    for label_type, (folder_path, is_deepfake) in PATHS.items():
         if not os.path.exists(folder_path):
             print(f"Warning: Folder not found: {folder_path}")
             continue
-            
-        print(f"Scanning directory: {label_type}...")
+
+        print(f"Scanning directory: {label_type} (is_deepfake={is_deepfake})...")
         files = [f for f in os.listdir(folder_path) if f.endswith('.mp4')]
-        is_deepfake = 1 if "fake" in label_type else 0
-        
+
         for f in tqdm(files):
             v_full_path = os.path.join(folder_path, f)
             measured_ita = scan_ita_fast(v_full_path)
-            
+
             if measured_ita is not None:
                 all_results.append({
                     "video_id": f,

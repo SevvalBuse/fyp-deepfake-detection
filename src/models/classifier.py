@@ -6,11 +6,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
 from xgboost import XGBClassifier
+import joblib
 import warnings
 warnings.filterwarnings("ignore")
 
 # --- CONFIG ---
-FEATURES_CSV = "data/output/unified_features.csv"
+FEATURES_CSV  = "data/output/unified_features.csv"
+BIAS_IDS_CSV  = "data/output/bias_audit_ids.csv"   # 300 held-out videos — excluded from training
 FEATURES = [
     "chrom_snr", "pos_snr", "chrom_bpm", "pos_bpm",
     "mean_ear", "std_ear", "min_ear",
@@ -25,9 +27,17 @@ N_SPLITS = 5
 def load_data():
     df = pd.read_csv(FEATURES_CSV)
     df = df.dropna(subset=FEATURES + [LABEL])
+
+    # Exclude the 300 held-out bias audit videos from training
+    bias_ids = pd.read_csv(BIAS_IDS_CSV)
+    bias_join = set(bias_ids["video_id"].apply(lambda x: str(x).split("/")[-1].replace(".mp4", "")))
+    df["join_id"] = df["video_id"].apply(lambda x: str(x).split("/")[-1].replace(".mp4", ""))
+    df = df[~df["join_id"].isin(bias_join)].reset_index(drop=True)
+
     X = df[FEATURES].values
     y = df[LABEL].values
     print(f"Dataset: {len(df)} videos ({int(y.sum())} fake, {int((y==0).sum())} real)")
+    print(f"(300 bias audit videos excluded from training)")
     return X, y, df
 
 
@@ -92,6 +102,20 @@ def run():
 
     print("\n========== FEATURE IMPORTANCES ==========")
     feature_importance(X, y)
+
+    # Train final RF and XGBoost on all 1,699 and save for held-out bias audit
+    print("\nTraining final models on all 1,699 videos...")
+    rf_final = RandomForestClassifier(n_estimators=200, random_state=42)
+    rf_final.fit(X, y)
+    joblib.dump(rf_final, "data/output/rf_model.pkl")
+    print("Saved to data/output/rf_model.pkl")
+
+    xgb_final = XGBClassifier(n_estimators=200, learning_rate=0.05,
+                               max_depth=4, eval_metric="logloss",
+                               random_state=42, verbosity=0)
+    xgb_final.fit(X, y)
+    joblib.dump(xgb_final, "data/output/xgb_model.pkl")
+    print("Saved to data/output/xgb_model.pkl")
 
 
 if __name__ == "__main__":
