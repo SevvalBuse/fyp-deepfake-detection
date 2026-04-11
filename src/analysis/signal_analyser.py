@@ -1,3 +1,11 @@
+"""
+Computes SNR and estimated BPM from the CHROM/POS filtered rPPG signals using
+FFT-based spectral analysis. Reads all .npy files from data/signals/audit_ff/clean/
+and saves per-video, per-method results to data/output/rppg_method_comparison.csv.
+
+SNR is measured as signal power in a narrow band (±0.1 Hz) around the dominant
+frequency peak, relative to total passband power (0.7–3.0 Hz).
+"""
 import numpy as np
 import os
 import pandas as pd

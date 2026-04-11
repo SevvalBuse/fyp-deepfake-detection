@@ -1,3 +1,12 @@
+"""
+Applies CHROM and POS rPPG algorithms to raw RGB signals and saves filtered
+output signals to data/signals/audit_ff/clean/. Reads raw .npy files produced
+by physio_extractor.py and per-video FPS from raw_metadata.csv.
+
+Each input video produces two output files: <video_id>_chrom.npy and
+<video_id>_pos.npy, both filtered with a 5th-order Butterworth bandpass
+filter (0.7–3.0 Hz, covering the 42–180 BPM heart rate range).
+"""
 import numpy as np
 import os
 import pandas as pd
@@ -50,7 +59,7 @@ def run_benchmark():
     meta_df = pd.read_csv(META_PATH)
     files = [f for f in os.listdir(RAW_DIR) if f.endswith('_raw.npy')]
     
-    print(f"Processing the 66-video audit set (CHROM vs POS)...")
+    print(f"Processing {len(files)} raw signal files (CHROM vs POS)...")
     
     for f in tqdm(files):
         # Match video ID with metadata

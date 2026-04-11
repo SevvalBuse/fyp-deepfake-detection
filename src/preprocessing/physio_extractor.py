@@ -1,3 +1,13 @@
+"""
+Extracts raw per-frame RGB signals from the FF++ bias audit videos and saves
+one .npy file per video to data/signals/audit_ff/raw/. Also appends per-video
+metadata (fps, frame counts) to data/output/raw_metadata.csv.
+
+The .npy files are consumed downstream by dual_algo_processor.py.
+Note: ITA values stored inside the .npy files use unscaled OpenCV LAB values
+and are NOT used in the final feature set — final ITA comes from
+ita_objective_audit.csv produced by compute_audit_ita.py.
+"""
 import cv2
 import dlib
 import pandas as pd
@@ -18,6 +28,10 @@ META_OUT = "data/output/raw_metadata.csv"
 
 
 def calculate_ita(l_val, b_val):
+    # Uses raw OpenCV LAB values (L in [0,255], b in [0,255]).
+    # This produces approximate ITA values stored in the .npy signal files,
+    # but these are NOT used in classification. The corrected ITA computation
+    # with proper normalisation is in compute_audit_ita.py.
     return np.arctan2((l_val - 50), b_val) * (180 / np.pi)
 
 

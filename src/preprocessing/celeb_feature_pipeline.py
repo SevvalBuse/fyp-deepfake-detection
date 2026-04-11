@@ -1,20 +1,17 @@
 """
 Celeb-DF v2 Feature Extraction Pipeline
-========================================
-Extracts all 12 features (rPPG + EAR + ITA) from Celeb-DF v2 videos.
+Extracts all 12 features from Celeb-DF v2 videos.
 
 Uses the EXACT same processing logic as the FF++ pipeline:
-  - ROI extraction     → physio_extractor.py
-  - CHROM / POS + BPF  → dual_algo_processor.py
-  - SNR / BPM (FFT)    → signal_analyser.py
-  - EAR / blink feats  → ear_extractor.py
-  - ITA                → celebdf_ita_inventory.csv (pre-computed)
+  - ROI extraction     -> physio_extractor.py
+  - CHROM / POS + BPF  -> dual_algo_processor.py
+  - SNR / BPM (FFT)    -> signal_analyser.py
+  - EAR / blink feats  -> ear_extractor.py
+  - ITA                -> celebdf_ita_inventory.csv (pre-computed)
 
 Combined into a single pass per video for efficiency (face detection
-is the bottleneck — no need to open each video twice).
+is the bottleneck, no need to open each video twice).
 
-Run from project root:
-    python src/preprocessing/celeb_feature_pipeline.py
 """
 
 import cv2
@@ -329,9 +326,9 @@ def extract_video_features(video_path):
     }
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # VIDEO SELECTION + MAIN
-# ══════════════════════════════════════════════════════════════════════════════
+
 
 def select_videos():
     """Select 889 real + 889 fake Celeb-DF videos. Saves selection for reproducibility."""

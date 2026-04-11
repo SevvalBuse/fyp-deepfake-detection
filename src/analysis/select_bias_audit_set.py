@@ -1,3 +1,10 @@
+"""
+Selects 300 videos (100 Dark, 100 Medium, 100 Light) from ita_objective_audit.csv
+for the held-out bias audit set and saves their IDs to bias_audit_ids.csv.
+Selection prioritises the most extreme ITA values in each group to maximise
+skin tone separation. The IDs in this file are permanently excluded from classifier
+training in classifier.py and bias_auditor.py.
+"""
 import pandas as pd
 
 # --- CONFIG ---
@@ -9,6 +16,9 @@ TARGET_PER_GROUP = 100  # 100 light + 100 medium + 100 dark = 300 total
 
 
 def ita_group(ita):
+    """Classify an ITA value into a skin tone group.
+    Dark: ITA <= 10 | Medium: 10 < ITA <= 41 | Light: ITA > 41.
+    """
     if ita <= 10:
         return "dark"
     elif ita <= 41:

@@ -1,6 +1,5 @@
 """
-Combined Classifier: FF++ + Celeb-DF (Fixed — No Data Leakage)
-================================================================
+Combined Classifier: FF++ + Celeb-DF (No Data Leakage)
 Proper evaluation with held-out test sets:
   - FF++ test set:     300 bias audit videos (never in any training set)
   - Celeb-DF test set: 150 held-out videos (never in any training set)
@@ -11,9 +10,6 @@ Three training conditions tested on BOTH held-out sets:
   3. Combined      (trained on ~1,700 FF++ + 1,550 Celeb-DF)
 
 Also runs 5-fold CV for each condition as a secondary metric.
-
-Run from project root:
-    python src/models/combined_classifier.py
 """
 
 import pandas as pd

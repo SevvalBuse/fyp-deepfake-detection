@@ -1,3 +1,14 @@
+"""
+Baseline classifier for the FF++ dataset. Trains Logistic Regression, Random
+Forest, and XGBoost on the 1,699-video training set using 5-fold stratified CV,
+then saves final RF and XGBoost models to data/output/ for the held-out bias audit.
+
+Training set is 1,699 videos: 300 ITA-stratified bias audit videos are permanently
+excluded, and 1 video was dropped due to face detection failure during extraction.
+Note: the XGBoost parameters here are the pre-tuning defaults used for the
+baseline comparison. Tuned parameters (from tune_xgboost.py) are used in
+bias_auditor.py and celeb_classifier.py.
+"""
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression

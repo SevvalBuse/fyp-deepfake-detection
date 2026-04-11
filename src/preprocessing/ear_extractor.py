@@ -1,3 +1,10 @@
+"""
+Extracts Eye Aspect Ratio (EAR) and blink features from the FF++ bias audit
+videos. Uses dlib 68-landmark model (landmarks 36–47 for both eyes) and saves
+7 blink-related features per video to data/output/ear_features.csv.
+
+Supports resuming: already-processed videos are skipped on re-run.
+"""
 import cv2
 import dlib
 import pandas as pd

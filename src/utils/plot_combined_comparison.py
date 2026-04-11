@@ -173,7 +173,51 @@ def plot_summary_table():
     print(f"Saved: {path}")
 
 
+def plot_celeb_improvement():
+    """Before/after chart: FF++ only vs Combined training on the Celeb-DF test set.
+    Shows the improvement in Celeb-DF accuracy gained by adding Celeb-DF to training.
+    """
+    labels = ["Random Forest", "XGBoost"]
+    ff_only  = [rf["FF++ only"]["celeb_test"],  xgb["FF++ only"]["celeb_test"]]
+    combined = [rf["Combined"]["celeb_test"],    xgb["Combined"]["celeb_test"]]
+
+    x = np.arange(len(labels))
+    w = 0.30
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    b1 = ax.bar(x - w/2, ff_only,  w, label="Trained on FF++ only", color="#4C72B0", edgecolor="white")
+    b2 = ax.bar(x + w/2, combined, w, label="Trained on Combined",   color="#55A868", edgecolor="white")
+
+    for bars in [b1, b2]:
+        for bar in bars:
+            h = bar.get_height()
+            ax.annotate(f"{h:.1%}",
+                        xy=(bar.get_x() + bar.get_width() / 2, h),
+                        xytext=(0, 4), textcoords="offset points",
+                        ha="center", va="bottom", fontsize=11, fontweight="bold")
+
+    ax.set_ylim(0, 1.0)
+    ax.set_ylabel("Accuracy on Celeb-DF Test Set", fontsize=12)
+    ax.set_title("Effect of Combined Training on Celeb-DF Generalisation\n(Held-out Celeb-DF test set, n=150 — no data leakage)",
+                 fontsize=12, fontweight="bold")
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=12)
+    ax.legend(fontsize=10)
+    ax.axhline(0.5, color="grey", linestyle="--", linewidth=0.8, alpha=0.5)
+    ax.yaxis.grid(True, linestyle="--", alpha=0.3)
+    ax.set_axisbelow(True)
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+
+    plt.tight_layout()
+    path = os.path.join(OUTPUT_DIR, "celeb_improvement.png")
+    plt.savefig(path, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {path}")
+
+
 if __name__ == "__main__":
     plot_held_out_comparison()
     plot_generalization_gap()
     plot_summary_table()
+    plot_celeb_improvement()

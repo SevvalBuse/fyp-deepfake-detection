@@ -1,3 +1,9 @@
+"""
+Merges ita_objective_audit.csv, rppg_method_comparison.csv, and ear_features.csv
+with the video labels from dataset_bias_audit.csv into a single unified_features.csv.
+This CSV is the main input for all classifiers. Joins on video_id and reports
+how many rows have complete data before saving.
+"""
 import pandas as pd
 import os
 

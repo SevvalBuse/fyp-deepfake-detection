@@ -1,3 +1,10 @@
+"""
+Demographic bias audit on the 300 held-out FF++ videos (100 Dark, 100 Medium,
+100 Light by ITA skin tone). Runs 5-fold CV for XGBoost (baseline, class-weighted,
+and per-group threshold optimisation), Random Forest, and Logistic Regression,
+then reports per-group accuracy and the fairness gap (max - min accuracy across groups).
+Also runs a direct held-out test using the pre-trained rf_model.pkl and xgb_model.pkl.
+"""
 import pandas as pd
 import numpy as np
 from xgboost import XGBClassifier
@@ -257,7 +264,6 @@ def plot_xgb_mitigation(baseline, class_w, thresh_opt):
     plt.tight_layout()
     path = os.path.join(OUTPUT_DIR, "bias_audit_xgb_mitigation.png")
     plt.savefig(path, dpi=300, bbox_inches="tight")
-    plt.show()
     print(f"Saved to {path}")
 
 
@@ -294,7 +300,6 @@ def plot_model_comparison(xgb_res, rf_res):
     plt.tight_layout()
     path = os.path.join(OUTPUT_DIR, "bias_audit_model_comparison.png")
     plt.savefig(path, dpi=300, bbox_inches="tight")
-    plt.show()
     print(f"Saved to {path}")
 
 
@@ -343,7 +348,7 @@ def run_held_out(df, model_path, label):
 def run():
     df = load_data()
 
-    print("\n--- Proper held-out evaluation")
+    print("\n--- Proper held-out evaluation (trained on 1,699, tested on 300) ---")
     run_held_out(df, "data/output/rf_model.pkl",  "Random Forest")
     run_held_out(df, "data/output/xgb_model.pkl", "XGBoost")
 

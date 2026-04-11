@@ -1,3 +1,8 @@
+"""
+Generates two visualisations from unified_features.csv: a full feature correlation
+heatmap and a bar chart showing each feature's Pearson correlation with the
+deepfake label. Output saved to data/report_visuals/.
+"""
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -45,14 +50,13 @@ def run():
         linewidths=0.5,
         annot_kws={"size": 8},
     )
-    plt.title("Feature Correlation Matrix — Deepfake Detection (n=1025)",
+    plt.title(f"Feature Correlation Matrix — Deepfake Detection (n={len(df)})",
               fontsize=13, fontweight="bold", pad=15)
     plt.xticks(rotation=45, ha="right", fontsize=9)
     plt.yticks(rotation=0, fontsize=9)
     plt.tight_layout()
     path1 = "data/report_visuals/correlation_matrix_final.png"
     plt.savefig(path1, dpi=300, bbox_inches="tight")
-    plt.show()
     print(f"Saved to {path1}")
 
     # --- Correlation with is_deepfake only (bar chart) ---
@@ -68,7 +72,6 @@ def run():
     plt.tight_layout()
     path2 = "data/report_visuals/feature_target_correlation.png"
     plt.savefig(path2, dpi=300, bbox_inches="tight")
-    plt.show()
     print(f"Saved to {path2}")
 
     print("\nCorrelations with is_deepfake:")

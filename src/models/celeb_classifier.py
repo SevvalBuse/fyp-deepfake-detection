@@ -1,14 +1,10 @@
 """
 Celeb-DF v2 Classifier + Bidirectional Cross-Dataset Test
-==========================================================
 1. Trains RF + XGBoost on Celeb-DF features (5-fold CV)
 2. Cross-tests in both directions:
-   - FF++ model  → Celeb-DF test set  (expected: poor — confirms the problem)
-   - Celeb-DF model → FF++ test set   (hypothesis: should generalise well)
+   - FF++ model  -> Celeb-DF test set  (expected: poor, confirms the generalisation problem)
+   - Celeb-DF model -> FF++ test set   (hypothesis: should generalise well)
 3. Produces comparison table for the report
-
-Run from project root:
-    python src/models/celeb_classifier.py
 """
 
 import pandas as pd
@@ -178,9 +174,8 @@ def run():
     X_celeb, y_celeb, df_celeb = load_celeb_data()
     X_ff_train, y_ff_train, X_ff_full, y_ff_full, df_ff = load_ff_data()
 
-    # ══════════════════════════════════════════════════════════════════════
+
     # PART 1: Celeb-DF 5-fold CV (same evaluation as FF++ classifier.py)
-    # ══════════════════════════════════════════════════════════════════════
     print("\n" + "=" * 70)
     print("  PART 1: CELEB-DF CLASSIFIER RESULTS (5-fold CV)")
     print("=" * 70)
@@ -199,9 +194,8 @@ def run():
     print("\n--- Celeb-DF Summary ---")
     print(pd.DataFrame(celeb_summary).set_index("model").round(3).to_string())
 
-    # ══════════════════════════════════════════════════════════════════════
+
     # PART 2: Train final models on full training sets
-    # ══════════════════════════════════════════════════════════════════════
     print("\n" + "=" * 70)
     print("  PART 2: TRAINING FINAL MODELS")
     print("=" * 70)
@@ -237,9 +231,8 @@ def run():
         ff_xgb = joblib.load(ff_xgb_path)
         print(f"\nLoaded FF++ models from {ff_rf_path} and {ff_xgb_path}")
 
-    # ══════════════════════════════════════════════════════════════════════
+
     # PART 3: BIDIRECTIONAL CROSS-DATASET TEST
-    # ══════════════════════════════════════════════════════════════════════
     print("\n" + "=" * 70)
     print("  PART 3: BIDIRECTIONAL CROSS-DATASET TEST")
     print("=" * 70)
@@ -258,9 +251,8 @@ def run():
     cross_results.append(cross_test(celeb_xgb, "XGBoost",       X_ff_full, y_ff_full,
                                     "Celeb-DF -> FF++"))
 
-    # ══════════════════════════════════════════════════════════════════════
+
     # SUMMARY TABLE
-    # ══════════════════════════════════════════════════════════════════════
     print("\n" + "=" * 70)
     print("  CROSS-DATASET SUMMARY")
     print("=" * 70)

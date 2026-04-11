@@ -1,3 +1,9 @@
+"""
+Scans all Celeb-DF v2 videos and computes ITA (skin tone) for each using the
+forehead ROI with correct LAB normalisation. Saves results to
+data/output/celebdf_ita_inventory.csv, which is consumed by
+celeb_feature_pipeline.py to attach ITA values to the extracted features.
+"""
 import cv2
 import dlib
 import numpy as np
@@ -64,9 +70,10 @@ def scan_ita_fast(v_path):
                 lab = cv2.cvtColor(roi, cv2.COLOR_BGR2Lab)
                 l_mean, _, b_mean = cv2.mean(lab)[:3]
                 
-                # 4. CRITICAL FIX: Normalize L from 0-255 to 0-100
+                # OpenCV stores L in [0,255] and b in [0,255].
+                # Standard ITA formula requires L in [0,100] and b in [-128,127].
                 l_norm = l_mean * (100 / 255)
-                b_std = b_mean - 128          # Shift b back to center at 0
+                b_std  = b_mean - 128
                 
                 ita_val = calculate_ita(l_norm, b_std)
                 ita_samples.append(ita_val)
@@ -100,7 +107,7 @@ def run_inventory_scan():
     # Save results to CSV for stratified sampling tomorrow
     df = pd.DataFrame(all_results)
     df.to_csv(OUTPUT_CSV, index=False)
-    print(f"\nSUCCESS: Scan complete. {len(df)} videos indexed in {OUTPUT_CSV}")
+    print(f"\nDone. {len(df)} videos scanned and saved to {OUTPUT_CSV}")
 
 if __name__ == "__main__":
     run_inventory_scan()

@@ -1,3 +1,8 @@
+"""
+Generates a 3-tier signal comparison plot (Raw Green Channel, CHROM, POS) for
+a given video. Used to visualise and justify the rPPG algorithm selection in
+the report. Output saved to data/report_visuals/benchmark_<video_id>.png.
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import os

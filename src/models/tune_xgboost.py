@@ -1,3 +1,8 @@
+"""
+Hyperparameter tuning for XGBoost and Random Forest via RandomizedSearchCV
+(80 iterations, 5-fold CV, optimising F1). Best XGBoost parameters found here
+are applied in bias_auditor.py, celeb_classifier.py, and combined_classifier.py.
+"""
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import RandomizedSearchCV, cross_validate, StratifiedKFold
@@ -108,7 +113,7 @@ def run():
     print(f"  Default XGB:   Acc=0.762, F1=0.757")
     print(f"  Tuned XGBoost: Acc={xgb_acc:.3f}, F1={xgb_f1:.3f}")
     print(f"  Tuned RF:      Acc={rf_acc:.3f}, F1={rf_f1:.3f}")
-    print("\nCopy the best params into bias_auditor.py")
+    print("\nBest params have been applied in bias_auditor.py, celeb_classifier.py, and combined_classifier.py")
 
 
 if __name__ == "__main__":

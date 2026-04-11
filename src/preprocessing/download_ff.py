@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-""" Downloads FaceForensics++ and Deep Fake Detection public data release
+"""
+Downloads FaceForensics++ and Deep Fake Detection public data release.
+Original script from the FaceForensics++ repository (Roessler et al., 2019).
+Used unmodified to acquire the FF++ c23 Deepfakes subset for this project.
+
 Example usage:
     see -h or https://github.com/ondyari/FaceForensics
 """

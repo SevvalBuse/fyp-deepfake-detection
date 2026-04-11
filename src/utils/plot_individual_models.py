@@ -24,7 +24,6 @@ def save_heatmap(title, df, filename, vmin=0.35, vmax=0.85):
     plt.tight_layout()
     path = f"data/report_visuals/individual_models/{filename}"
     plt.savefig(path, dpi=300, bbox_inches="tight")
-    plt.show()
     plt.close()
     print(f"Saved: {path}")
 

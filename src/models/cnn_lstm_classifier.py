@@ -1,3 +1,10 @@
+"""
+Experimental CNN-LSTM classifier trained directly on raw rPPG signal sequences
+(CHROM + POS as a 2-channel input). Achieved 51.4% accuracy with severe
+overfitting across all 5 folds, performing at random-chance level. This approach
+was abandoned in favour of the classical ML classifiers (classifier.py) which
+use hand-crafted features extracted from the same signals.
+"""
 import numpy as np
 import pandas as pd
 import os
