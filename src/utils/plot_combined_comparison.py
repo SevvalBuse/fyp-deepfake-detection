@@ -78,7 +78,7 @@ def plot_held_out_comparison():
     plt.tight_layout()
     path = os.path.join(OUTPUT_DIR, "combined_held_out_comparison.png")
     plt.savefig(path, dpi=300, bbox_inches="tight")
-    plt.close()
+    plt.show()
     print(f"Saved: {path}")
 
 
@@ -121,7 +121,7 @@ def plot_generalization_gap():
     plt.tight_layout()
     path = os.path.join(OUTPUT_DIR, "combined_generalization_gap.png")
     plt.savefig(path, dpi=300, bbox_inches="tight")
-    plt.close()
+    plt.show()
     print(f"Saved: {path}")
 
 
@@ -169,7 +169,7 @@ def plot_summary_table():
     plt.tight_layout()
     path = os.path.join(OUTPUT_DIR, "combined_summary_xgboost.png")
     plt.savefig(path, dpi=300, bbox_inches="tight")
-    plt.close()
+    plt.show()
     print(f"Saved: {path}")
 
 
@@ -212,7 +212,7 @@ def plot_celeb_improvement():
     plt.tight_layout()
     path = os.path.join(OUTPUT_DIR, "celeb_improvement.png")
     plt.savefig(path, dpi=300, bbox_inches="tight")
-    plt.close()
+    plt.show()
     print(f"Saved: {path}")
 
 

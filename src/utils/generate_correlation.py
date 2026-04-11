@@ -57,6 +57,7 @@ def run():
     plt.tight_layout()
     path1 = "data/report_visuals/correlation_matrix_final.png"
     plt.savefig(path1, dpi=300, bbox_inches="tight")
+    plt.show()
     print(f"Saved to {path1}")
 
     # --- Correlation with is_deepfake only (bar chart) ---
@@ -72,6 +73,7 @@ def run():
     plt.tight_layout()
     path2 = "data/report_visuals/feature_target_correlation.png"
     plt.savefig(path2, dpi=300, bbox_inches="tight")
+    plt.show()
     print(f"Saved to {path2}")
 
     print("\nCorrelations with is_deepfake:")

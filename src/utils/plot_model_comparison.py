@@ -51,7 +51,7 @@ ax.set_axisbelow(True)
 plt.tight_layout()
 save_path = "data/report_visuals/model_comparison.png"
 plt.savefig(save_path, dpi=300, bbox_inches="tight")
-plt.close()
+plt.show()
 print(f"Saved to {save_path}")
 
 # --- Accuracy-only bar chart ---
@@ -78,4 +78,5 @@ ax2.set_axisbelow(True)
 plt.tight_layout()
 save_path2 = "data/report_visuals/model_accuracy_only.png"
 plt.savefig(save_path2, dpi=300, bbox_inches="tight")
+plt.show()
 print(f"Saved to {save_path2}")
