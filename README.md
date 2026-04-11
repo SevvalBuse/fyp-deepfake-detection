@@ -1,24 +1,50 @@
 # FYP – Deepfake Video Detection via Physiological Signals
 
-This Final Year Project (BSc Computer Science) investigates deepfake video
-detection through the analysis of physiological signals, with a particular
-focus on algorithmic fairness across skin tone groups.
+This Final Year Project (BSc Computer Science, University of Greenwich) investigates deepfake video
+detection through the analysis of physiological signals, with a focus on algorithmic fairness
+across skin tone groups.
 
-Unlike traditional artifact-based detectors, this project leverages
-biological cues — eye-blink dynamics and remote photoplethysmography (rPPG) —
-to improve robustness against unseen manipulations and real-world compression.
+Unlike traditional artefact-based detectors, this project uses biological cues, specifically eye-blink dynamics
+and remote photoplethysmography (rPPG), to improve robustness against unseen manipulations and
+real-world compression. A key objective is to evaluate whether the detection system behaves
+consistently across diverse skin tone groups, using the Individual Typology Angle (ITA) scale as
+a fairness-aware audit mechanism.
 
-A key objective is to evaluate whether physiological-based deepfake detection
-systems behave consistently across diverse skin tone groups, using the
-Individual Typology Angle (ITA) scale as a fairness-aware audit mechanism.
+---
+
+## Quick Start
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+> The dashboard requires 6 pre-trained model files in `data/output/` and `shape_predictor_68_face_landmarks.dat` in `src/`. See Setup below.
+
+---
+
+## Repository Structure
+
+```
+├── app.py                  # Streamlit dashboard
+├── requirements.txt
+├── src/
+│   ├── preprocessing/      # rPPG signal extraction, EAR, ITA computation
+│   ├── analysis/           # Signal analysis, SNR/BPM, feature merging
+│   ├── models/             # RF, XGBoost, CNN-LSTM classifiers
+│   ├── evaluation/         # Bias audit (ITA skin tone groups)
+│   └── utils/              # Visualisation scripts
+└── data/                   # Excluded from Git (too large)
+    ├── audit_set/          # Raw videos
+    ├── signals/            # Extracted .npy signal files
+    └── output/             # Feature CSVs and trained models
+```
 
 ---
 
 ## Setup & Requirements
 
 ### 1. Install Dependencies
-
-Activate your virtual environment and install required libraries:
 
 ```bash
 pip install -r requirements.txt
@@ -34,23 +60,44 @@ Download `shape_predictor_68_face_landmarks.dat` and place it inside the `src/` 
 
 ---
 
-## Dataset
+## Running the Dashboard
 
-- **Source:** FaceForensics++ (FF++), c23 compression, Deepfakes method
-- **Size:** 1,026 videos (513 real, 513 fake)
-- **Construction:**
-  - Initial 66 videos manually curated and labelled using `src/utils/manual_annotator.py`
-  - Expanded to 1,026 using automated ITA-based skin tone selection (`src/preprocessing/expand_audit_set.py`)
-  - Selection balanced across light (ITA > 41), medium (10 < ITA ≤ 41), and dark (ITA ≤ 10) groups
-  - Skin tone measured objectively from forehead region using the ITA formula — no manual labelling for expanded set
-- **Labels:** `data/output/dataset_bias_audit.csv` — `video_id`, `is_deepfake`, `gender_presentation`, `skin_tone_group`
-- **Bias audit subset:** `data/output/bias_audit_ids.csv` — 300 videos with balanced ITA groups (100 per group) used for fairness evaluation
+```bash
+streamlit run app.py
+```
+
+The dashboard has three tabs:
+- **Analyse Video**: pipeline demonstration using pre-extracted signals
+- **Upload & Detect**: real-time feature extraction and ensemble prediction across 6 trained models
+- **Bias Audit**: fairness evaluation results across ITA skin tone groups
+
+---
+
+## Datasets
+
+### FaceForensics++ (FF++)
+- **Source:** FF++, c23 compression, Deepfakes manipulation method
+- **Total:** 1,999 videos (after 1 dropped due to face detection failure)
+- **Training set:** 1,699 videos
+- **Held-out test set:** 300 videos (100 Dark, 100 Medium, 100 Light; 50 real + 50 fake each)
+- **Skin tone selection:** ITA-based stratified sampling using `src/preprocessing/expand_audit_set.py`
+
+### Celeb-DF v2
+- **Total:** 1,700 videos sampled (850 real + 850 fake)
+- **Training set:** 1,550 videos (775 real + 775 fake)
+- **Held-out test set:** 150 videos (75 real + 75 fake)
+- **Feature extraction:** `src/preprocessing/celeb_feature_pipeline.py`
 
 ---
 
 ## Pipeline
 
-All scripts are run from the **project root**. Run in the following order:
+All scripts are run from the **project root**.
+
+<details>
+<summary><b>Click to expand the full Preprocessing & Training Pipeline</b></summary>
+
+The Celeb-DF pipeline mirrors steps 1–6 using `celeb_feature_pipeline.py`.
 
 ### 1. `src/preprocessing/physio_extractor.py`
 Detects faces, extracts forehead and cheek ROIs per frame, records BGR colour signals.
@@ -58,7 +105,7 @@ Detects faces, extracts forehead and cheek ROIs per frame, records BGR colour si
 - **Output:** `data/signals/audit_ff/raw/*.npy`, `data/output/raw_metadata.csv`
 
 ### 2. `src/preprocessing/dual_algo_processor.py`
-Applies CHROM and POS rPPG algorithms + Butterworth bandpass filter (0.7–3.0 Hz).
+Applies CHROM and POS rPPG algorithms with a Butterworth bandpass filter (0.7–3.0 Hz, 5th order).
 - **Input:** `data/signals/audit_ff/raw/*.npy`, `data/output/raw_metadata.csv`
 - **Output:** `data/signals/audit_ff/clean/*_chrom.npy`, `*_pos.npy`
 
@@ -73,44 +120,58 @@ Extracts 7 eye-blink features per video using dlib 68-point landmarks and Eye As
 - **Output:** `data/output/ear_features.csv`
 
 ### 5. `src/preprocessing/compute_audit_ita.py`
-Recomputes ITA values for all videos using the correct OpenCV LAB normalisation.
+Computes ITA values for all videos from the forehead ROI using the correct OpenCV LAB normalisation.
 - **Input:** `data/audit_set/` videos, `data/output/dataset_bias_audit.csv`
 - **Output:** `data/output/ita_objective_audit.csv`
 
 ### 6. `src/analysis/feature_merger.py`
-Merges rPPG features, EAR features, and ITA values into a single feature matrix.
-- **Input:** `data/output/rppg_method_comparison.csv`, `data/output/ear_features.csv`, `data/output/ita_objective_audit.csv`
+Merges rPPG features, EAR features, and ITA values into a single 12-feature matrix.
+- **Input:** `rppg_method_comparison.csv`, `ear_features.csv`, `ita_objective_audit.csv`, `dataset_bias_audit.csv`
 - **Output:** `data/output/unified_features.csv`
+
+### 7. `src/models/classifier.py`
+Trains Random Forest, XGBoost, and Logistic Regression on the FF++ training set (1,699 videos).
+Saves trained models and reports 5-fold CV and held-out test metrics.
+- **Output:** `data/output/rf_model.pkl`, `xgb_model.pkl`
+
+### 8. `src/models/celeb_classifier.py`
+Trains RF and XGBoost on the Celeb-DF dataset and runs a bidirectional cross-dataset test.
+- **Output:** `data/output/celeb_rf_model.pkl`, `celeb_xgb_model.pkl`, `cross_dataset_results.csv`
+
+### 9. `src/models/combined_classifier.py`
+Trains RF and XGBoost on the combined FF++ + Celeb-DF dataset and evaluates on both held-out test sets.
+- **Output:** `data/output/combined_rf_model.pkl`, `combined_xgb_model.pkl`, `combined_comparison_results.csv`
+
+### 10. `src/evaluation/bias_auditor.py`
+Evaluates the FF++ RF model on the 300-video held-out test set, broken down by ITA skin tone group.
+- **Output:** `data/report_visuals/bias_audit_*.png`
+
+</details>
 
 ---
 
-## Output Files
+## Key Output Files
 
 | File | Description |
 |---|---|
-| `data/output/dataset_bias_audit.csv` | Master list of 1,026 videos with labels and demographic metadata |
-| `data/output/raw_metadata.csv` | FPS and frame count per video |
-| `data/output/rppg_method_comparison.csv` | SNR and BPM per video per rPPG method |
-| `data/output/ear_features.csv` | 7 blink features per video |
-| `data/output/ita_objective_audit.csv` | Objective ITA skin tone values for all videos |
-| `data/output/unified_features.csv` | Merged feature matrix for classifier training (1,026 rows, 12 features) |
-| `data/output/bias_audit_ids.csv` | 300-video ITA-balanced subset for fairness evaluation |
+| `data/output/unified_features.csv` | FF++ feature matrix (n=1,999, 12 features) |
+| `data/output/celeb_unified_features.csv` | Celeb-DF feature matrix |
+| `data/output/bias_audit_ids.csv` | 300-video ITA-balanced held-out test set |
+| `data/output/rf_model.pkl` | Trained FF++ Random Forest model |
+| `data/output/xgb_model.pkl` | Trained FF++ XGBoost model |
+| `data/output/celeb_rf_model.pkl` | Trained Celeb-DF Random Forest model |
+| `data/output/celeb_xgb_model.pkl` | Trained Celeb-DF XGBoost model |
+| `data/output/combined_rf_model.pkl` | Trained Combined Random Forest model |
+| `data/output/combined_xgb_model.pkl` | Trained Combined XGBoost model |
+| `data/output/cross_dataset_results.csv` | Bidirectional cross-dataset generalisation results |
+| `data/output/combined_comparison_results.csv` | FF++ only vs Celeb-DF only vs Combined comparison |
+| `data/output/ita_objective_audit.csv` | Correct ITA values for all FF++ videos |
 
 ---
 
 ## Report Visuals
 
-All charts are saved to `data/report_visuals/`:
-
-| File | Description |
-|---|---|
-| `model_comparison.png` | All models — accuracy, precision, recall, F1 |
-| `model_accuracy_only.png` | Accuracy-only bar chart |
-| `correlation_matrix_final.png` | 13×13 feature correlation heatmap |
-| `feature_target_correlation.png` | Per-feature correlation with deepfake label |
-| `bias_audit_model_comparison.png` | XGBoost vs RF by ITA skin tone group |
-| `bias_audit_xgb_mitigation.png` | XGBoost baseline vs class weights vs ThresholdOpt |
-| `individual_models/*.png` | Per-model heatmaps with ITA group breakdown |
+All charts are saved to `data/report_visuals/` by running the scripts in `src/utils/`.
 
 ---
 
@@ -124,14 +185,24 @@ Skin tone groups are derived from the ITA (Individual Typology Angle) scale:
 | Medium | 10 < ITA ≤ 41 |
 | Light | ITA > 41 |
 
-ITA is measured directly from each video's forehead region using the LAB colour space. For fake videos, ITA reflects the face shown in the video (the source identity), not the target.
+ITA is measured from the forehead region of each video using the LAB colour space.
+For fake videos, ITA reflects the face shown in the video (the source identity).
+
+---
+
+## Key Results
+
+| Model | Training Set | FF++ Held-out | Celeb-DF Held-out |
+|---|---|---|---|
+| Random Forest | FF++ only | **77.0%** | 54.0% |
+| XGBoost | FF++ only | 76.3% | 52.0% |
+| Random Forest | Combined | 75.3% | **67.3%** |
+| XGBoost | Combined | 74.7% | 65.3% |
+
+**Bias audit (FF++ RF, 300 held-out videos):** Light 80%, Medium 77%, Dark 73%, a 7.0% fairness gap.
 
 ---
 
 ## Status
 
-In progress – Final Year Project (BSc Computer Science)
-
-**Completed:** Dataset construction, rPPG extraction (CHROM + POS), SNR/BPM analysis, EAR blink extraction, ITA audit
-
-**In progress:** Feature merging → classifier training → bias-stratified evaluation → Streamlit dashboard
+Complete — Final Year Project (BSc Computer Science, University of Greenwich)
