@@ -749,23 +749,3 @@ with tab3:
         else:
             st.error("Gap > 10% — significant bias detected.")
 
-    st.divider()
-    st.subheader("Feature Importance (Random Forest)")
-
-    if hasattr(audit_model, "feature_importances_"):
-        importances = pd.Series(audit_model.feature_importances_, index=FEATURES)
-        importances = importances.sort_values(ascending=True)
-
-        fig_imp, ax_imp = plt.subplots(figsize=(7, 4))
-        ax_imp.barh(
-            [FEATURE_LABELS[f] for f in importances.index],
-            importances.values,
-            color="steelblue",
-        )
-        ax_imp.set_xlabel("Importance")
-        ax_imp.set_title("Feature Importances")
-        for spine in ["top", "right"]:
-            ax_imp.spines[spine].set_visible(False)
-        plt.tight_layout()
-        st.pyplot(fig_imp)
-        plt.close(fig_imp)

@@ -107,7 +107,12 @@ def run_bias_audit(df, label, make_model_fn):
         predict_fn = make_model_fn(X_train, y_train, groups_train)
         preds_val  = predict_fn(X_val, groups_val)
 
-        overall_results.append(accuracy_score(y_val, preds_val))
+        overall_results.append({
+            "accuracy":  accuracy_score(y_val, preds_val),
+            "precision": precision_score(y_val, preds_val, zero_division=0),
+            "recall":    recall_score(y_val, preds_val, zero_division=0),
+            "f1":        f1_score(y_val, preds_val, zero_division=0),
+        })
 
         val_df          = df.iloc[val_idx].copy()
         val_df["_pred"] = preds_val
@@ -127,7 +132,12 @@ def run_bias_audit(df, label, make_model_fn):
             })
 
     print(f"\n========== BIAS AUDIT — {label.upper()} ==========")
-    print(f"Overall accuracy: {np.mean(overall_results):.3f} ± {np.std(overall_results):.3f}")
+    overall_acc  = np.mean([r["accuracy"]  for r in overall_results])
+    overall_prec = np.mean([r["precision"] for r in overall_results])
+    overall_rec  = np.mean([r["recall"]    for r in overall_results])
+    overall_f1   = np.mean([r["f1"]        for r in overall_results])
+    print(f"Overall: Acc={overall_acc:.3f} ± {np.std([r['accuracy'] for r in overall_results]):.3f} | "
+          f"Prec={overall_prec:.3f} | Rec={overall_rec:.3f} | F1={overall_f1:.3f}")
 
     summary = {}
     for group in ITA_GROUPS:

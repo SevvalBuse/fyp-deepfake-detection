@@ -17,7 +17,7 @@ comm==0.2.3
 debugpy==1.8.18
 decorator==5.2.1
 defusedxml==0.7.1
-dlib @ file:///C:/Users/Buse/FYP/fyp-deepfake-detection/dlib-19.24.1-cp311-cp311-win_amd64.whl#sha256=6f1a5ee167975d7952b28e0ce4495f1d9a77644761cf5720fb66d7c6188ae496
+dlib==19.24.1
 executing==2.2.1
 fastjsonschema==2.21.2
 filelock==3.20.0
@@ -58,7 +58,9 @@ nest-asyncio==1.6.0
 networkx==3.6.1
 notebook==7.5.0
 notebook_shim==0.2.4
+matplotlib==3.10.8
 numpy==1.26.4
+pandas==2.3.3
 opencv-python==4.12.0.88
 overrides==7.7.0
 packaging==25.0
@@ -83,7 +85,10 @@ rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
 rfc3987-syntax==1.1.0
 rpds-py==0.30.0
+scikit-learn==1.8.0
 scipy==1.16.3
+seaborn==0.13.2
+streamlit==1.55.0
 Send2Trash==1.8.3
 six==1.17.0
 soupsieve==2.8
@@ -100,6 +105,7 @@ tzdata==2025.3
 uri-template==1.3.0
 urllib3==2.6.2
 wcwidth==0.2.14
+xgboost==3.2.0
 webcolors==25.10.0
 webencodings==0.5.1
 websocket-client==1.9.0
