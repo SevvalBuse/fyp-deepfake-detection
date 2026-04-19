@@ -23,8 +23,6 @@ streamlit run app.py
 
 > The dashboard requires 6 pre-trained model files in `data/output/` and `shape_predictor_68_face_landmarks.dat` in `src/`. See Setup below.
 
-> **Sample videos** for testing Tab 2 (Upload & Detect) are provided in `data/samples/`: `sample_real.mp4` and `sample_fake.mp4`. Both are from the FF++ held-out test set (never seen during training).
-
 > **Note:** The raw video datasets (FF++ and Celeb-DF) are not included due to size constraints and dataset-specific terms and conditions. The `data/output/` directory contains all pre-extracted feature CSVs and trained model files, so the dashboard (Tabs 1, 2, and 3) is fully functional without re-running the pipeline. The preprocessing scripts in `src/preprocessing/` require the original video datasets to run. All other scripts — models, evaluation, analysis, and visualisation utilities — can be run using the pre-extracted data in `data/output/` and `data/signals/`.
 
 ---
